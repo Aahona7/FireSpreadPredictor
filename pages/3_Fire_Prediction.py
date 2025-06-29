@@ -9,6 +9,7 @@ import joblib
 import os
 from utils.weather_api import get_weather_data
 from utils.visualization import create_risk_map, create_prediction_dashboard
+from utils.database import store_prediction
 
 st.set_page_config(page_title="Fire Prediction", page_icon="🔥", layout="wide")
 
@@ -243,6 +244,54 @@ with tab1:
                     title=f"Top 10 Feature Contributions - {model_name}"
                 )
                 st.plotly_chart(fig_contrib, use_container_width=True)
+    
+    # Store prediction in database
+    if st.button("Save Prediction to Database"):
+        try:
+            # Get best model prediction for storage
+            if problem_type == "regression":
+                best_model_name = max(predictions.keys(), key=lambda k: predictions[k] if predictions[k] > 0 else 0)
+                predicted_value = predictions[best_model_name]
+                risk_level = "Low" if predicted_value < 1 else "Medium" if predicted_value < 10 else "High"
+            else:
+                # For classification, use the most common prediction
+                pred_values = list(predictions.values())
+                predicted_value = max(set(pred_values), key=pred_values.count)
+                risk_labels = ["No Fire", "Low Risk", "Medium Risk", "High Risk"]
+                risk_level = risk_labels[int(predicted_value)]
+            
+            # Weather conditions for storage
+            weather_conditions = {
+                'temperature': temperature,
+                'humidity': humidity,
+                'wind_speed': wind_speed,
+                'rain': rain,
+                'ffmc': ffmc,
+                'dmc': dmc,
+                'dc': dc,
+                'isi': isi
+            }
+            
+            # Store prediction
+            success = store_prediction(
+                model_name=best_model_name,
+                x_coord=x_coord,
+                y_coord=y_coord,
+                weather_conditions=weather_conditions,
+                predicted_value=float(predicted_value),
+                prediction_type=problem_type,
+                confidence_score=confidence if problem_type == "regression" else None,
+                risk_level=risk_level,
+                user_id="streamlit_user"
+            )
+            
+            if success:
+                st.success("Prediction saved to database successfully!")
+            else:
+                st.error("Failed to save prediction to database")
+                
+        except Exception as e:
+            st.error(f"Error saving prediction: {str(e)}")
 
 with tab2:
     st.header("Batch Prediction")

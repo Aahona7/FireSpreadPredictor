@@ -11,6 +11,7 @@ import joblib
 import os
 from utils.models import train_regression_models, train_classification_models
 from utils.preprocessing import preprocess_data, create_features
+from utils.database import store_model_results, store_fire_data, get_fire_data
 
 st.set_page_config(page_title="Model Training", page_icon="🤖", layout="wide")
 
@@ -389,7 +390,22 @@ if 'trained_models' in st.session_state:
                 }
                 
                 joblib.dump(model_data, "models/forest_fire_models.pkl")
-                st.success("✅ Models saved successfully!")
+                
+                # Store model results in database
+                for model_name, model in st.session_state.trained_models.items():
+                    metrics = st.session_state.model_metrics.get(model_name, {})
+                    
+                    # Store in database
+                    store_model_results(
+                        model_name=model_name,
+                        problem_type=st.session_state.problem_type,
+                        metrics=metrics,
+                        feature_names=st.session_state.feature_names,
+                        dataset_size=len(data),
+                        notes=f"Trained on {len(data)} records with {len(st.session_state.feature_names)} features"
+                    )
+                
+                st.success("✅ Models saved successfully and stored in database!")
                 
             except Exception as e:
                 st.error(f"Error saving models: {str(e)}")

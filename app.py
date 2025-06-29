@@ -53,10 +53,30 @@ def main():
     if 'fire_data' not in st.session_state:
         with st.spinner("Loading forest fire data..."):
             try:
-                st.session_state.fire_data = load_forest_fire_data()
-                st.success("✅ Forest fire data loaded successfully!")
+                from utils.database import get_fire_data, init_database, store_fire_data
+                
+                # Initialize database
+                init_database()
+                
+                # Try loading from database first
+                db_data = get_fire_data(limit=1000)
+                
+                if not db_data.empty:
+                    st.session_state.fire_data = db_data
+                    st.success(f"Loaded {len(db_data)} fire records from database!")
+                else:
+                    # Fall back to external data sources
+                    data = load_forest_fire_data()
+                    if data is not None:
+                        st.session_state.fire_data = data
+                        # Store in database for future use
+                        store_fire_data(data, source="uci_repository")
+                        st.success(f"Loaded {len(data)} fire records and stored in database!")
+                    else:
+                        st.session_state.fire_data = None
+                        
             except Exception as e:
-                st.error(f"❌ Error loading data: {str(e)}")
+                st.error(f"Error loading data: {str(e)}")
                 st.session_state.fire_data = None
     
     if st.session_state.fire_data is not None:
