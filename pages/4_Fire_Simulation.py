@@ -110,6 +110,20 @@ with tab1:
         st.subheader("Current Conditions")
         
         # Calculate fire danger index
+        def calculate_fire_danger_index(temperature, humidity, wind_speed, fuel_moisture):
+            """Calculate a simple fire danger index based on weather conditions."""
+            # Normalized fire danger calculation (0-10 scale)
+            temp_factor = min(temperature / 40, 1.0)  # Normalize to 0-1
+            humidity_factor = (100 - humidity) / 100  # Inverse humidity
+            wind_factor = min(wind_speed / 50, 1.0)  # Normalize wind
+            moisture_factor = (30 - fuel_moisture) / 30  # Inverse moisture
+            
+            # Weighted combination
+            danger_index = (temp_factor * 0.3 + humidity_factor * 0.3 + 
+                          wind_factor * 0.2 + moisture_factor * 0.2) * 10
+            
+            return max(0, min(10, danger_index))
+        
         fire_danger = calculate_fire_danger_index(temperature, humidity, wind_speed, fuel_moisture)
         
         # Display danger level
