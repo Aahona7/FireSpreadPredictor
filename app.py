@@ -130,7 +130,17 @@ def main():
         
         # Data preview
         st.subheader("Dataset Preview")
-        st.dataframe(data.head(10), use_container_width=True)
+        clean_df = data.copy()
+
+        # Try forcing consistent types
+        clean_df = clean_df.infer_objects()
+
+        # Optional: round floats or convert to string if needed
+        # clean_df = clean_df.round(2)
+
+        st.dataframe(clean_df.head(10), use_container_width=True)
+
+       # st.dataframe(data.head(10), use_container_width=True)
         
         # Dataset information
         with st.expander("Dataset Information"):
