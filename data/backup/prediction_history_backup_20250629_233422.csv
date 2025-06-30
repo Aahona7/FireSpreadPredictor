@@ -1,0 +1,2 @@
+Date,Model,Location,Predicted Value,Risk Level,Confidence,Type
+2025-06-29 17:58:49.646933,XGBoost,"(5.0, 5.0)",3.506582260131836,Medium,55.891530464060736,regression

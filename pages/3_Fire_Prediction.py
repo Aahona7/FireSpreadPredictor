@@ -15,6 +15,23 @@ st.set_page_config(page_title="Fire Prediction", page_icon="🔥", layout="wide"
 
 st.title("🔥 Forest Fire Risk Prediction")
 
+def clean_json(data):
+    import numpy as np
+    if isinstance(data, dict):
+        return {str(k): clean_json(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [clean_json(i) for i in data]
+    elif isinstance(data, (np.integer, np.int32, np.int64)):
+        return int(data)
+    elif isinstance(data, (np.floating, np.float32, np.float64)):
+        return float(data)
+    elif isinstance(data, (np.bool_)):
+        return bool(data)
+    elif isinstance(data, (np.ndarray,)):
+        return clean_json(data.tolist())
+    else:
+        return data
+
 # Load trained models
 @st.cache_data
 def load_trained_models():
@@ -261,16 +278,17 @@ with tab1:
                 risk_level = risk_labels[int(predicted_value)]
             
             # Weather conditions for storage
-            weather_conditions = {
-                'temperature': temperature,
+            weather_conditions = clean_json({
+                'temperature': temp,
                 'humidity': humidity,
-                'wind_speed': wind_speed,
+                'wind_speed': wind,
                 'rain': rain,
                 'ffmc': ffmc,
                 'dmc': dmc,
                 'dc': dc,
                 'isi': isi
-            }
+})
+
             
             # Store prediction
             success = store_prediction(

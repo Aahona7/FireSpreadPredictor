@@ -173,8 +173,11 @@ if st.button("Train Models", type="primary"):
                 st.session_state.feature_names = available_features_in_data
                 st.session_state.categorical_encoders = categorical_encoders
                 st.session_state.problem_type = "regression"
+                st.session_state["trained_models"] = models
+                st.session_state["model_metrics"] = metrics
+                st.success("Models trained and stored successfully!")
                 
-                st.success("✅ Regression models trained successfully!")
+               # st.success("✅ Regression models trained successfully!")
                 
             else:
                 models, metrics = train_classification_models(

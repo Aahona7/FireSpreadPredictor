@@ -8,6 +8,25 @@ import matplotlib.pyplot as plt
 from utils.simulation import FireSpreadSimulator, CellularAutomataSimulator
 from utils.visualization import create_simulation_animation, plot_spread_statistics
 
+def clean_json(data):
+    import numpy as np
+    if isinstance(data, dict):
+        return {k: clean_json(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [clean_json(v) for v in data]
+    elif isinstance(data, tuple):
+        return tuple(clean_json(list(data)))
+    elif isinstance(data, (np.integer, np.int32, np.int64)):
+        return int(data)
+    elif isinstance(data, (np.floating, np.float32, np.float64)):
+        return float(data)
+    elif isinstance(data, (np.bool_)):
+        return bool(data)
+    elif isinstance(data, (np.ndarray,)):
+        return clean_json(data.tolist())
+    else:
+        return data
+
 st.set_page_config(page_title="Fire Simulation", page_icon="🔥", layout="wide")
 
 st.title("🔥 Forest Fire Spread Simulation")
@@ -321,7 +340,8 @@ with tab1:
                 }
                 
                 import json
-                json_data = json.dumps(export_data, indent=2)
+                json_data = json.dumps(clean_json(export_data), indent=2)
+
                 
                 st.download_button(
                     label="Download Simulation Results (JSON)",

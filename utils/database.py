@@ -16,10 +16,35 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import streamlit as st
 
 # Database configuration
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = "sqlite:///forestfire.db"
 engine = create_engine(DATABASE_URL) if DATABASE_URL else None
 
 Base = declarative_base()
+
+def clean_json(data):
+    """Recursively convert any object to JSON-serializable types."""
+    import numpy as np
+
+    if isinstance(data, dict):
+        return {str(k): clean_json(v) for k, v in data.items()}
+    elif isinstance(data, list):
+        return [clean_json(v) for v in data]
+    elif isinstance(data, (np.integer, np.int32, np.int64)):
+        return int(data)
+    elif isinstance(data, (np.floating, np.float32, np.float64)):
+        return float(data)
+    elif isinstance(data, (np.ndarray,)):
+        return clean_json(data.tolist())
+    elif isinstance(data, (np.bool_)):
+        return bool(data)
+    else:
+        try:
+            # Final fallback
+            import json
+            json.dumps(data)
+            return data
+        except:
+            return str(data)
 
 class FireData(Base):
     """Table for storing historical fire data."""
@@ -219,7 +244,10 @@ def store_model_results(model_name, problem_type, metrics, feature_names,
             test_score = metrics.get('R² Score', 0)
         else:
             test_score = metrics.get('Accuracy', 0)
-        
+        metrics = clean_json(metrics)
+        feature_names = clean_json(feature_names)
+        hyperparameters = clean_json(hyperparameters or {})
+
         record = ModelResults(
             model_name=model_name,
             problem_type=problem_type,
@@ -272,6 +300,8 @@ def store_prediction(model_name, x_coord, y_coord, weather_conditions,
         return False
     
     try:
+        weather_conditions = clean_json(weather_conditions)
+
         record = Predictions(
             model_name=model_name,
             x_coord=x_coord,

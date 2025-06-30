@@ -1,0 +1,11 @@
+Model,Type,Training Date,Test Score,Dataset Size,Features,Notes
+Random Forest,regression,2025-06-29 17:51:20.986061,-0.036283738755073625,517,8,Trained on 517 records with 8 features
+XGBoost,regression,2025-06-29 17:51:20.986061,-0.19985060352741701,517,8,Trained on 517 records with 8 features
+Gradient Boosting,regression,2025-06-29 17:51:20.986061,-0.16518022566344137,517,8,Trained on 517 records with 8 features
+Linear Regression,regression,2025-06-29 17:51:20.986061,0.015134319185473144,517,8,Trained on 517 records with 8 features
+Ridge Regression,regression,2025-06-29 17:51:20.986061,0.014775729514405311,517,8,Trained on 517 records with 8 features
+Lasso Regression,regression,2025-06-29 17:51:20.986061,0.003880657895776629,517,8,Trained on 517 records with 8 features
+Neural Network,regression,2025-06-29 17:51:20.986061,-0.24495829301965766,517,8,Trained on 517 records with 8 features
+Support Vector Regression,regression,2025-06-29 17:51:20.986061,-0.07942113132238382,517,8,Trained on 517 records with 8 features
+K-Nearest Neighbors,regression,2025-06-29 17:51:20.986061,-0.1869376478450171,517,8,Trained on 517 records with 8 features
+Decision Tree,regression,2025-06-29 17:51:20.986061,-0.6196360508272365,517,8,Trained on 517 records with 8 features

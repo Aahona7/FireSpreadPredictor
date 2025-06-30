@@ -4,6 +4,7 @@ import numpy as np
 from utils.data_loader import load_forest_fire_data
 from utils.visualization import create_overview_map
 
+
 # Page configuration
 st.set_page_config(
     page_title="Forest Fire Prediction System",
