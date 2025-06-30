@@ -1,6 +1,7 @@
 [server]
+enableCORS = false
 headless = true
-address = "0.0.0.0"
+
 
 
 [theme]
