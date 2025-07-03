@@ -114,12 +114,29 @@ def create_overview_map(data, lat_col='Y', lon_col='X', area_col='area'):
         </div>
     </div>
 
+    <!-- Restore Button -->
+    <button id="restore-legend" style="
+        position: fixed;
+        bottom: 50px; left: 50px;
+        z-index:9999;
+        padding: 6px 12px;
+        font-size: 14px;
+        background-color: white;
+        border: 1px solid #555;
+        border-radius: 6px;
+        box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        display: none;
+        cursor: pointer;">
+        🗺 Show Legend
+    </button>
+
     <script>
         const legend = document.getElementById('map-legend');
         const header = document.getElementById('legend-header');
         const closeBtn = document.getElementById('close-btn');
         const toggleBtn = document.getElementById('toggle-btn');
         const body = document.getElementById('legend-body');
+        const restoreBtn = document.getElementById('restore-legend');
 
         let offsetX, offsetY, isDragging = false;
 
@@ -135,12 +152,18 @@ def create_overview_map(data, lat_col='Y', lon_col='X', area_col='area'):
             if (isDragging) {
                 legend.style.left = (e.clientX - offsetX) + 'px';
                 legend.style.top = (e.clientY - offsetY) + 'px';
-                legend.style.bottom = 'auto';  // prevent jump
+                legend.style.bottom = 'auto';
             }
         });
 
         closeBtn.addEventListener('click', () => {
             legend.style.display = 'none';
+            restoreBtn.style.display = 'block';
+        });
+
+        restoreBtn.addEventListener('click', () => {
+            legend.style.display = 'block';
+            restoreBtn.style.display = 'none';
         });
 
         toggleBtn.addEventListener('click', () => {
@@ -154,6 +177,7 @@ def create_overview_map(data, lat_col='Y', lon_col='X', area_col='area'):
         });
     </script>
     '''
+
     m.get_root().html.add_child(folium.Element(legend_html))
     
     return m
