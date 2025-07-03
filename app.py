@@ -7,7 +7,7 @@ from utils.visualization import create_overview_map
 
 # Page configuration
 st.set_page_config(
-    page_title="Forest Fire Prediction System",
+    page_title="Fire Prediction System",
     page_icon="🔥",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -33,7 +33,7 @@ st.markdown("""
 
 def main():
     # Main header
-    st.markdown('<h1 class="main-header">🔥 Forest Fire Prediction & Simulation System</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🔥Fire Prediction & Simulation System</h1>', unsafe_allow_html=True)
     
     # Sidebar information
     st.sidebar.title("Navigation")
