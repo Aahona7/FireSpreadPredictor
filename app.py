@@ -33,7 +33,7 @@ st.markdown("""
 
 def main():
     # Main header
-    st.markdown('<h1 class="main-header">🔥Fire Prediction & Simulation System</h1>', unsafe_allow_html=True)
+    st.markdown('<h1 class="main-header">🔥Forest Fire Prediction & Simulation System</h1>', unsafe_allow_html=True)
     
     # Sidebar information
     st.sidebar.title("Navigation")
