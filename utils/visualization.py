@@ -85,17 +85,74 @@ def create_overview_map(data, lat_col='Y', lon_col='X', area_col='area'):
 
     # Improved legend
     legend_html = '''
-    <div style="position: fixed; 
-                bottom: 50px; left: 50px; width: 170px; 
-                background-color: white; border:2px solid grey; 
-                z-index:9999; font-size:14px; padding: 10px;
-                box-shadow: 2px 2px 6px rgba(0,0,0,0.3);">
-    <b>🔥 Fire Severity</b><br>
-    <span style="display:inline-block; width:12px; height:12px; background-color:green; border-radius:50%; margin-right:5px;"></span>No Fire<br>
-    <span style="display:inline-block; width:12px; height:12px; background-color:yellow; border-radius:50%; margin-right:5px;"></span>Small (≤1 ha)<br>
-    <span style="display:inline-block; width:12px; height:12px; background-color:orange; border-radius:50%; margin-right:5px;"></span>Medium (1–10 ha)<br>
-    <span style="display:inline-block; width:12px; height:12px; background-color:red; border-radius:50%; margin-right:5px;"></span>Large (>10 ha)
+    <div id="map-legend" style="
+        position: fixed;
+        bottom: 50px; left: 50px;
+        width: 200px;
+        background-color: white;
+        border: 2px solid grey;
+        z-index:9999;
+        font-size:14px;
+        padding: 10px;
+        box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+        cursor: move;
+        border-radius: 8px;">
+        
+        <div id="legend-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <b>🔥 Fire Severity</b>
+            <div>
+                <button id="toggle-btn" style="border:none; background:none; cursor:pointer; font-size:16px;">🔽</button>
+                <button id="close-btn" style="border:none; background:none; cursor:pointer; font-size:16px;">✖️</button>
+            </div>
+        </div>
+        
+        <div id="legend-body" style="margin-top:8px;">
+            <span style="display:inline-block; width:12px; height:12px; background-color:green; border-radius:50%; margin-right:5px;"></span>No Fire<br>
+            <span style="display:inline-block; width:12px; height:12px; background-color:yellow; border-radius:50%; margin-right:5px;"></span>Small (≤1 ha)<br>
+            <span style="display:inline-block; width:12px; height:12px; background-color:orange; border-radius:50%; margin-right:5px;"></span>Medium (1–10 ha)<br>
+            <span style="display:inline-block; width:12px; height:12px; background-color:red; border-radius:50%; margin-right:5px;"></span>Large (>10 ha)
+        </div>
     </div>
+
+    <script>
+        const legend = document.getElementById('map-legend');
+        const header = document.getElementById('legend-header');
+        const closeBtn = document.getElementById('close-btn');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const body = document.getElementById('legend-body');
+
+        let offsetX, offsetY, isDragging = false;
+
+        header.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            offsetX = e.clientX - legend.getBoundingClientRect().left;
+            offsetY = e.clientY - legend.getBoundingClientRect().top;
+        });
+
+        document.addEventListener('mouseup', () => isDragging = false);
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                legend.style.left = (e.clientX - offsetX) + 'px';
+                legend.style.top = (e.clientY - offsetY) + 'px';
+                legend.style.bottom = 'auto';  // prevent jump
+            }
+        });
+
+        closeBtn.addEventListener('click', () => {
+            legend.style.display = 'none';
+        });
+
+        toggleBtn.addEventListener('click', () => {
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                toggleBtn.textContent = '🔽';
+            } else {
+                body.style.display = 'none';
+                toggleBtn.textContent = '🔼';
+            }
+        });
+    </script>
     '''
     m.get_root().html.add_child(folium.Element(legend_html))
     
