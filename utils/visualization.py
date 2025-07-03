@@ -30,7 +30,10 @@ def create_overview_map(data, lat_col='Y', lon_col='X', area_col='area'):
     
     if lat_col not in data.columns or lon_col not in data.columns:
         return None
-    
+
+    # Filter out coordinates likely over ocean or invalid range
+    data = data[(data[lat_col] > 4) & (data[lat_col] < 45) & (data[lon_col] > -10) & (data[lon_col] < 40)]
+
     # Calculate map center
     center_lat = data[lat_col].mean()
     center_lon = data[lon_col].mean()
@@ -42,71 +45,62 @@ def create_overview_map(data, lat_col='Y', lon_col='X', area_col='area'):
         tiles='OpenStreetMap'
     )
     
-    # Add fire locations
-    if area_col in data.columns:
-        # Color code by fire severity
-        for idx, row in data.iterrows():
-            lat, lon = row[lat_col], row[lon_col]
-            area = row[area_col]
-            
-            # Determine color and size based on burned area
-            if area == 0:
-                color = 'green'
-                radius = 3
-                popup_text = f"No fire detected<br>Location: ({lat}, {lon})"
-            elif area <= 1:
-                color = 'yellow'
-                radius = 5
-                popup_text = f"Small fire: {area:.2f} ha<br>Location: ({lat}, {lon})"
-            elif area <= 10:
-                color = 'orange'
-                radius = 8
-                popup_text = f"Medium fire: {area:.2f} ha<br>Location: ({lat}, {lon})"
-            else:
-                color = 'red'
-                radius = 12
-                popup_text = f"Large fire: {area:.2f} ha<br>Location: ({lat}, {lon})"
-            
-            folium.CircleMarker(
-                location=[lat, lon],
-                radius=radius,
-                popup=popup_text,
-                color=color,
-                fill=True,
-                fillColor=color,
-                fillOpacity=0.7
-            ).add_to(m)
-    else:
-        # Just show locations without severity
-        for idx, row in data.iterrows():
-            lat, lon = row[lat_col], row[lon_col]
-            
-            folium.CircleMarker(
-                location=[lat, lon],
-                radius=5,
-                popup=f"Fire location<br>Coordinates: ({lat}, {lon})",
-                color='red',
-                fill=True,
-                fillColor='red',
-                fillOpacity=0.6
-            ).add_to(m)
-    
-    # Add legend
+    # Add fire markers
+    for idx, row in data.iterrows():
+        # Approximate grid-to-latlon conversion for Portugal
+        lat = 41.8 + (row[lat_col] - 5) * 0.01
+        lon = -6.8 + (row[lon_col] - 5) * 0.01
+
+        area = row.get(area_col, 0)
+
+        # Determine color and size
+        if area == 0:
+            color = 'green'
+            radius = 3
+            popup_text = f"No fire detected<br>Location: ({lat}, {lon})"
+        elif area <= 1:
+            color = 'yellow'
+            radius = 5
+            popup_text = f"Small fire: {area:.2f} ha<br>Location: ({lat}, {lon})"
+        elif area <= 10:
+            color = 'orange'
+            radius = 8
+            popup_text = f"Medium fire: {area:.2f} ha<br>Location: ({lat}, {lon})"
+        else:
+            color = 'red'
+            radius = 12
+            popup_text = f"Large fire: {area:.2f} ha<br>Location: ({lat}, {lon})"
+        
+        folium.CircleMarker(
+            location=[lat, lon],
+            radius=6,
+            tooltip=popup_text,
+            color=color,          # Outline color = fill
+            weight=2,
+            fill=True,
+            fillColor=color,
+            fillOpacity=0.7
+        ).add_to(m)
+
+
+    # Improved legend
     legend_html = '''
     <div style="position: fixed; 
-                top: 10px; right: 10px; width: 150px; height: 120px; 
-                background-color: white; border:2px solid grey; z-index:9999; 
-                font-size:14px; padding: 10px">
-    <p><b>Fire Severity</b></p>
-    <p><i class="fa fa-circle" style="color:green"></i> No Fire</p>
-    <p><i class="fa fa-circle" style="color:yellow"></i> Small (≤1 ha)</p>
-    <p><i class="fa fa-circle" style="color:orange"></i> Medium (1-10 ha)</p>
-    <p><i class="fa fa-circle" style="color:red"></i> Large (>10 ha)</p>
+                bottom: 50px; left: 50px; width: 170px; 
+                background-color: white; border:2px solid grey; 
+                z-index:9999; font-size:14px; padding: 10px;
+                box-shadow: 2px 2px 6px rgba(0,0,0,0.3);">
+    <b>🔥 Fire Severity</b><br>
+    <span style="display:inline-block; width:12px; height:12px; background-color:green; border-radius:50%; margin-right:5px;"></span>No Fire<br>
+    <span style="display:inline-block; width:12px; height:12px; background-color:yellow; border-radius:50%; margin-right:5px;"></span>Small (≤1 ha)<br>
+    <span style="display:inline-block; width:12px; height:12px; background-color:orange; border-radius:50%; margin-right:5px;"></span>Medium (1–10 ha)<br>
+    <span style="display:inline-block; width:12px; height:12px; background-color:red; border-radius:50%; margin-right:5px;"></span>Large (>10 ha)
     </div>
     '''
     m.get_root().html.add_child(folium.Element(legend_html))
     
     return m
+
 
 def create_correlation_heatmap(data):
     """
